@@ -6,26 +6,12 @@
 library(CellChat)
 library(patchwork)
 options(stringsAsFactors = FALSE)
-load("D:/HPC_DATA_MOUSE_NEW COVID_April2022/Rrun/data_humanSkin_CellChat.rda")
-data.input = data_humanSkin$data # normalized data matrix
-meta = data_humanSkin$meta # a dataframe with rownames containing cell mata data
-cell.use = rownames(meta)[meta$condition == "LS"] # extract the cell names from disease data
-View(data_humanSkin$meta)
-View(data.input@Dimnames)
-data.input = data.input[, cell.use]
-meta = meta[cell.use, ]
-View(meta)
-unique(meta$labels)
-
-
+############ SET Working Directory ##################
 setwd ("D:/HPC_DATA_MOUSE_NEW COVID_April2022/Rrun")
 mouse<-readRDS("Allmouse_updatedcelltypes_14June.rds") 
 cell.use = rownames(mouse)[mouse$Condition == "IL7_treated"]
 meta = data.frame(labels = mouse$updated_subtypes[cell.use], row.names = colnames(mouse)) # manually create a dataframe consisting of the cell labels
 
-Idents(mouse)<-"Condition"
-data.input<-subset(mouse,idents= c('IL7_treated'), invert=FALSE)
-View(data.input@meta.data)
 cellchat <- createCellChat(object = data.input,group.by = "updated_subtypes")
 cellchat <- setIdent(cellchat, ident.use = "updated_subtypes")
 levels(cellchat@idents)
@@ -34,9 +20,7 @@ View(groupSize)
 CellChatDB<-CellChatDB.mouse
 showDatabaseCategory(CellChatDB)
 dplyr::glimpse(CellChatDB$interaction)
-# Extra line:
-CellChatDB.use <- CellChatDB
-## extraline ends
+
 CellChatDB.use <- subsetDB(CellChatDB, search = "ECM_Receptor")
 cellchat@DB <- CellChatDB.use
 cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
@@ -134,37 +118,6 @@ cellchatMO <- netClustering(cellchatMO, type = "functional")
 # Visualization in 2D-space
 netVisual_embeddingPairwise(cellchatMO, type = "functional", label.size = 3.5)
 #> 2D visualization of signaling networks from datasets 1 2
-
-
-#####################33333333
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 gg1 <- netVisual_heatmap(cellchat)
 #> Do heatmap based on a merged object
 gg2 <- netVisual_heatmap(cellchat, measure = "weight")
@@ -288,4 +241,3 @@ netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
  nPatterns = 4
  cellchat <- identifyCommunicationPatterns(cellchat, pattern = "incoming", k = nPatterns)
  netAnalysis_dot(cellchat, pattern = "incoming") 
- 
